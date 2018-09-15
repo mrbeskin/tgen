@@ -46,13 +46,23 @@ func GenerateFromFileWithSubstitutionFile(tempFile string, subFile string) (stri
 }
 
 func parseSubstitutionFile(subFile string) (map[string]string, error) {
-	subs := make(map[string]string)
 	subBuf, err := ioutil.ReadFile(subFile)
 	if err != nil {
-		return subs, err
+		return make(map[string]string), err
 	}
 	s := strings.Trim(string(subBuf), " ")
 	sList := strings.Split(string(s), "\n")
+	return getMapFromPairList(sList)
+}
+
+func ParseSubstitutions(s string) (map[string]string, error) {
+	s = strings.Trim(string(s), " ")
+	sList := strings.Split(string(s), " ")
+	return getMapFromPairList(sList)
+}
+
+func getMapFromPairList(sList []string) (map[string]string, error) {
+	subs := make(map[string]string)
 	for i, s := range sList {
 		// replace to avoid deleting valid = in value portion - kinda hacky
 		sReplaced := strings.Replace(s, "=", "{{=}}", 1)
