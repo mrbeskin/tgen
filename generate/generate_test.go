@@ -1,6 +1,8 @@
 package generate
 
 import (
+	"io/ioutil"
+	"os"
 	"testing"
 )
 
@@ -78,5 +80,76 @@ func TestGenerateComplex_NotEnoughSubstitutionsFailure(t *testing.T) {
 	}
 	if gen != "" {
 		t.Fatalf("expected failure with empty string, but got \n%v\n", gen)
+	}
+}
+
+func TestGenerateFromFile(t *testing.T) {
+	templ := `VER: 1.0
+	name: {{ NAME }}
+	type: person
+	password: {{ PASSWORD }}
+	notes: none`
+	templFile := "template"
+	err := ioutil.WriteFile(templFile, []byte(templ), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	substitutions := make(map[string]string)
+	substitutions["NAME"] = "mike"
+	substitutions["PASSWORD"] = "badpassword"
+	gen, err := GenerateFromFile(templFile, substitutions)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedOut := `VER: 1.0
+	name: mike
+	type: person
+	password: badpassword
+	notes: none`
+	if gen != expectedOut {
+		t.Fatalf("expected \n%v\n, but got \n%v\n", expectedOut, gen)
+	}
+	err = os.Remove(templFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
+func TestGenerateFromFileWithSubstitutionFile(t *testing.T) {
+	templ := `VER: 1.0
+	name: {{ NAME }}
+	type: person
+	password: {{ PASSWORD }}
+	notes: none`
+	substitutions := "NAME=mike\nPASSWORD=badpassword\n"
+	templFile := "template"
+	subFile := "substitutions"
+	err := ioutil.WriteFile(templFile, []byte(templ), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = ioutil.WriteFile(subFile, []byte(substitutions), 0644)
+	if err != nil {
+		t.Fatal(err)
+	}
+	gen, err := GenerateFromFileWithSubstitutionFile(templFile, subFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedOut := `VER: 1.0
+	name: mike
+	type: person
+	password: badpassword
+	notes: none`
+	if gen != expectedOut {
+		t.Fatalf("expected \n%v\n, but got \n%v\n", expectedOut, gen)
+	}
+	err = os.Remove(templFile)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = os.Remove(subFile)
+	if err != nil {
+		t.Fatal(err)
 	}
 }

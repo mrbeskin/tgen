@@ -2,6 +2,7 @@ package generate
 
 import (
 	"fmt"
+	"io/ioutil"
 	"regexp"
 	"strings"
 )
@@ -27,7 +28,7 @@ func Generate(templ string, subs map[string]string) (string, error) {
 // GenerateFromFile first reads a template from file then replaces values with
 // substitutions and returns the output as a string.
 func GenerateFromFile(templFile string, subs map[string]string) (string, error) {
-	b, err := ioutil.ReadFile(templFile, subs)
+	b, err := ioutil.ReadFile(templFile)
 	if err != nil {
 		return "", fmt.Errorf("could not read template from file [ %v ]: %v", templFile, err)
 	}
@@ -36,7 +37,7 @@ func GenerateFromFile(templFile string, subs map[string]string) (string, error) 
 
 // GenerateFromFileWithConfigFile reads a file of new line delimited key value pairs of the form
 // KEY=VALUE then parses the template file and replaces templated values with substitutions.
-func GenerateFromFileWithConfigFile(tempFile string, subFile string) (string, error) {
+func GenerateFromFileWithSubstitutionFile(tempFile string, subFile string) (string, error) {
 	subs, err := parseSubstitutionFile(subFile)
 	if err != nil {
 		return "", err
@@ -51,11 +52,11 @@ func parseSubstitutionFile(subFile string) (map[string]string, error) {
 		return subs, err
 	}
 	s := strings.Trim(string(subBuf), " ")
-	sList := strings.Split(string(s, "\n"))
+	sList := strings.Split(string(s), "\n")
 	for i, s := range sList {
-		// replace to avoid deleting valid = in value portion
+		// replace to avoid deleting valid = in value portion - kinda hacky
 		sReplaced := strings.Replace(s, "=", "{{=}}", 1)
-		sPair = strings.Split(s, "{{=}}")
+		sPair := strings.Split(sReplaced, "{{=}}")
 		isPair, err := validatePairLine(sPair)
 		if err != nil {
 			return subs, fmt.Errorf("config file line %v: %v", i+1, err)
