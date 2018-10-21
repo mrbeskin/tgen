@@ -55,6 +55,8 @@ func parseSubstitutionFile(subFile string) (map[string]string, error) {
 	return getMapFromPairList(sList)
 }
 
+// ParseSubstitutions parses a string of substitutions in the form SECRET=value
+// into a key-value map of strings.
 func ParseSubstitutions(s string) (map[string]string, error) {
 	s = strings.Trim(string(s), " ")
 	sList := strings.Split(string(s), " ")
