@@ -24,6 +24,12 @@ $ tgen -t template -f substitutions
 Hello,
 The secret is I am a Cylon.
 ```
+You may also pass substitutions via the command line:
+```
+$ tgen -t template -r SECRET=I am a Cylon.
+Hello,
+The secret is I am a Cylon.
+```
 
 
 
