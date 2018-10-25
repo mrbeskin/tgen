@@ -17,8 +17,24 @@ var outputFile string
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:   "tgen",
-	Short: "Generate combined output from a template file and associated values",
-	Long:  ``,
+	Short: "Interpolate values into a templated file.",
+	Long:  `This tool was developed to make it simple to replace template strings in config files with the proper values.
+	It uses a key/value system, where you pass in key/value pairs that match with templated keys in the file being interpolated. 
+
+Am example file, called "template": 
+
+	Hello,
+	The secret is {{ SECRET }}.
+
+An example substitution file called "substitutions": 
+
+	SECRET=I am a Cylon
+
+Would work this way:
+ 
+	$ tgen -t /path/to/template -f /path/to/substitutions
+	Hello,
+	The secret is I am a Cylon.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		var g string
 		var err error
